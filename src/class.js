@@ -14,13 +14,12 @@ const btnLoadMore = document.querySelector('.load-more');
 // Изначально кнопка скрыта
 btnLoadMore.classList.add('is-hidden');
 
-
 export class searchImages {
     constructor() {
         this.page = 1;
         this.perPage = 40;
         this.searchValue = '';
-        
+        this.lightbox = null;
     }
 
     getValue() {
@@ -64,15 +63,13 @@ export class searchImages {
             btnLoadMore.classList.add('is-hidden')
             return 
         }
-
     return response.data
     }
     
     nextPage() {
         this.getImages(this.searchValue, this.page)
-            .then(this.renderImages)
+            .then(this.renderImages.bind(this))
             .then(this.scroll)
-            // .then(this.loadLB)
             .catch(error => console.log(error));
     }
 
@@ -84,16 +81,16 @@ export class searchImages {
     });
     }
  
-    renderImages = function(data) {
+    renderImages = function (data) {
         
         if (!data) {
-        return
+            return
         }
         
-    const markup = data.hits
-        .map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
+        const markup = data.hits
+            .map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
           
-             return `
+                return `
             <a class="gallery-link" href="${largeImageURL}">
             <div class="photo-card">
             <img class="photo-image"src="${webformatURL}" alt="${tags}" loading="lazy" />
@@ -114,20 +111,17 @@ export class searchImages {
             </div>
             </a>
              `
-    })
-      .join("");
+            })
+            .join("");
       
         gallery.insertAdjacentHTML('beforeend', markup);
         
-        
-        let lightbox = new SimpleLightbox('.gallery a');
-        lightbox.refresh();
+        if (!this.lightbox) {
+            this.lightbox = new SimpleLightbox('.gallery a');
+        } else { 
+        this.lightbox.refresh()
+    }
         // Добавить кнопку после отрисовки
         btnLoadMore.classList.remove('is-hidden');     
     }
-    
-    // loadLB() {
-        
-    // }
-    
 }
